@@ -7,11 +7,15 @@
 
 import UIKit
 
+protocol NoteActions: AnyObject {
+    func saveNotes(detailNote: Note)
+}
+
 class NotesDetailVC: UIViewController {
     
     var notes: [Note] = []
     var detailNote: Note?
-    
+    weak var delegate: NoteActions?
     
     lazy var containerView: UIView = {
         let view = UIView()
@@ -97,21 +101,16 @@ class NotesDetailVC: UIViewController {
 }
 
 
-extension NotesDetailVC: UITextViewDelegate {
+extension NotesDetailVC {
     @objc func tapSaveNote() {
         if notes.count <= 0 {
-            var note = Note(id: 1, title: nil, description: textView.text)
-            notes.append(note)
             print("Notes is created successfully")
         } else {
-            if let detailNote = detailNote {
-                let id = detailNote.id
-                var updatedNote = Note(id: id, title: detailNote.title, description: textView.text)
-                notes.remove(at: id-1)
-                notes.insert(updatedNote, at: detailNote.id-1)
-                //Need to check whether I can directly add or sorting and stuff enough
-            }
+            print("Notes is updated successfully")
         }
+        let updatedNote = Note(id: detailNote?.id ?? 1, title: detailNote?.title, description: textView.text)
+        self.delegate?.saveNotes(detailNote: updatedNote)
+        self.navigationController?.popViewController(animated: true)
     }
     
     @objc func deleteNote() {
@@ -122,7 +121,9 @@ extension NotesDetailVC: UITextViewDelegate {
             }
         }
     }
-    
+}
+
+extension NotesDetailVC: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
 
         if textView.textColor == UIColor.lightGray {

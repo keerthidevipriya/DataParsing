@@ -72,6 +72,11 @@ class ViewController: UIViewController {
         self.handleNotes()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.handleNotes()
+    }
+    
     func createContentView() {
         NSLayoutConstraint.activate([
             self.containerView.topAnchor.constraint(equalTo: self.view.topAnchor),
@@ -136,6 +141,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 extension ViewController {
     func navigateToNotesDetailVC(detailNote: Note?) {
         let vc = NotesDetailVC.makeViewController(notes: self.notes, detailNote: detailNote)
+        vc.delegate = self
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -144,3 +150,13 @@ extension ViewController {
     }
 }
 
+
+extension ViewController: NoteActions {
+    func saveNotes(detailNote: Note) {
+        let id = detailNote.id
+        self.notes.append(detailNote)
+        
+        //self.notes.remove(at: id-1)
+        //self.notes.insert(detailNote, at: detailNote.id-1)
+    }
+}
