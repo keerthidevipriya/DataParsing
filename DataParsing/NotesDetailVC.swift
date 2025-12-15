@@ -27,7 +27,7 @@ class NotesDetailVC: UIViewController {
     lazy var saveBtn: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.titleLabel?.text = "Create"
+        btn.setTitle("Create", for: .normal)
         btn.backgroundColor = .blue
         btn.titleLabel?.textColor = .white
         btn.addTarget(self, action: #selector(tapSaveNote), for: .touchUpInside)
@@ -37,7 +37,7 @@ class NotesDetailVC: UIViewController {
     lazy var deleteBtn: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.titleLabel?.text = "Create"
+        btn.setTitle("Delete", for: .normal)
         btn.backgroundColor = .blue
         btn.titleLabel?.textColor = .white
         btn.addTarget(self, action: #selector(deleteNote), for: .touchUpInside)
@@ -55,7 +55,7 @@ class NotesDetailVC: UIViewController {
     }()
 
     static func makeViewController(notes: [Note], detailNote: Note?) -> NotesDetailVC {
-        var vc = NotesDetailVC()
+        let vc = NotesDetailVC()
         vc.notes = notes
         vc.detailNote = detailNote
         return vc
@@ -87,7 +87,6 @@ class NotesDetailVC: UIViewController {
             self.deleteBtn.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 24),
             self.deleteBtn.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
             self.deleteBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32)
-            //self.createBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -12)
         ])
     }
     

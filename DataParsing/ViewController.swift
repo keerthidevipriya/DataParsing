@@ -49,7 +49,7 @@ class ViewController: UIViewController {
     lazy var createBtn: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.titleLabel?.text = "Create"
+        btn.setTitle("Create", for: .normal)
         btn.backgroundColor = .blue
         btn.titleLabel?.textColor = .white
         btn.addTarget(self, action: #selector(tapCreate), for: .touchUpInside)
@@ -94,7 +94,8 @@ class ViewController: UIViewController {
             self.createBtn.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 24),
             self.createBtn.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
             self.createBtn.topAnchor.constraint(equalTo: self.tv.bottomAnchor, constant: 16),
-            self.createBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32)
+            self.createBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32),
+            self.createBtn.heightAnchor.constraint(equalToConstant: 32)
         ])
     }
     
@@ -128,7 +129,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
         let text = notes[indexPath.row].description
-        cell.backgroundColor = .gray
+        cell.backgroundColor = .lightGray
         cell.textLabel?.text = text
         return cell
     }
