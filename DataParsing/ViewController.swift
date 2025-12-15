@@ -51,7 +51,7 @@ class ViewController: UIViewController {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Create", for: .normal)
         btn.backgroundColor = .blue
-        btn.titleLabel?.textColor = .white
+        btn.setTitleColor(.white, for: .normal)
         btn.addTarget(self, action: #selector(tapCreate), for: .touchUpInside)
         return btn
     }()
@@ -59,8 +59,10 @@ class ViewController: UIViewController {
     lazy var infoLbl: UILabel = {
         let lbl = UILabel()
         lbl.translatesAutoresizingMaskIntoConstraints = false
-        lbl.text = "No notes created 😔 Create one to start new!!!!"
+        lbl.text = "No notes created 😔 Create one to start!"
         lbl.textColor = .darkGray
+        lbl.textAlignment = .center
+        lbl.numberOfLines = 0
         return lbl
     }()
 
@@ -86,6 +88,8 @@ class ViewController: UIViewController {
             
             self.infoLbl.centerXAnchor.constraint(equalTo: self.containerView.centerXAnchor),
             self.infoLbl.centerYAnchor.constraint(equalTo: self.containerView.centerYAnchor),
+            self.infoLbl.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 24),
+            self.infoLbl.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
             
             self.tv.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 120),
             self.tv.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 12),
@@ -95,7 +99,7 @@ class ViewController: UIViewController {
             self.createBtn.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
             self.createBtn.topAnchor.constraint(equalTo: self.tv.bottomAnchor, constant: 16),
             self.createBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32),
-            self.createBtn.heightAnchor.constraint(equalToConstant: 32)
+            self.createBtn.heightAnchor.constraint(equalToConstant: 36)
         ])
     }
     
@@ -107,18 +111,15 @@ class ViewController: UIViewController {
     }
     
     func handleNotes() {
-        if notes.count > 0 {
-            self.infoLbl.isHidden = true
-            fetchNotes()
-        } else {
+        if notes.isEmpty {
             self.infoLbl.isHidden = false
+            self.tv.isHidden = true
+        } else {
+            self.infoLbl.isHidden = true
+            self.tv.isHidden = false
+            self.tv.reloadData()
         }
     }
-    
-    func fetchNotes() {
-        self.tv.reloadData()
-    }
-
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
@@ -127,14 +128,16 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        let text = notes[indexPath.row].description
+        let cell = UITableViewCell(style: .default, reuseIdentifier: "NoteCell")
+        let note = notes[indexPath.row]
+        cell.textLabel?.text = note.description
+        cell.textLabel?.numberOfLines = 0
         cell.backgroundColor = .lightGray
-        cell.textLabel?.text = text
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         self.navigateToNotesDetailVC(detailNote: notes[indexPath.row])
     }
 }
@@ -151,23 +154,20 @@ extension ViewController {
     }
 }
 
-
 extension ViewController: NoteActions {
-    
     func deleteNotes(detailNote: Note) {
-        let id = detailNote.id
-        self.notes.remove(at: id-1)
-        self.tv.reloadData()
+        if let index = notes.firstIndex(where: { $0.id == detailNote.id }) {
+            notes.remove(at: index)
+            handleNotes()
+        }
     }
     
     func saveNotes(detailNote: Note) {
-        let id = detailNote.id
-        if notes.count > 0 {
-            self.notes.remove(at: id-1)
-            self.notes.insert(detailNote, at: detailNote.id-1)
+        if let index = notes.firstIndex(where: { $0.id == detailNote.id }) {
+            notes[index] = detailNote
         } else {
-            self.notes.append(detailNote)
+            notes.append(detailNote)
         }
-        
+        handleNotes()
     }
 }

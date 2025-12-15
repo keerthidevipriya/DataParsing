@@ -28,9 +28,8 @@ class NotesDetailVC: UIViewController {
     lazy var saveBtn: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Create", for: .normal)
         btn.backgroundColor = .blue
-        btn.titleLabel?.textColor = .white
+        btn.setTitleColor(.white, for: .normal)
         btn.addTarget(self, action: #selector(tapSaveNote), for: .touchUpInside)
         return btn
     }()
@@ -39,8 +38,8 @@ class NotesDetailVC: UIViewController {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Delete", for: .normal)
-        btn.backgroundColor = .blue
-        btn.titleLabel?.textColor = .white
+        btn.backgroundColor = .red
+        btn.setTitleColor(.white, for: .normal)
         btn.addTarget(self, action: #selector(deleteNote), for: .touchUpInside)
         return btn
     }()
@@ -50,7 +49,7 @@ class NotesDetailVC: UIViewController {
         tview.translatesAutoresizingMaskIntoConstraints = false
         tview.delegate = self
         tview.text = "Enter notes..."
-        tview.font = UIFont.systemFont(ofSize: 24)
+        tview.font = UIFont.systemFont(ofSize: 18)
         tview.textColor = UIColor.lightGray
         return tview
     }()
@@ -64,11 +63,21 @@ class NotesDetailVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = detailNote == nil ? "Create Note" : "Edit Note"
         self.createViews()
         self.createContentView()
+        self.setUpButton()
+    }
+    
+    func setUpButton() {
         if let detailNote = detailNote {
             self.textView.text = detailNote.description
             self.textView.textColor = .black
+            self.saveBtn.setTitle("Save", for: .normal)
+            self.deleteBtn.isHidden = false
+        } else {
+            self.saveBtn.setTitle("Create", for: .normal)
+            self.deleteBtn.isHidden = true
         }
     }
     
@@ -79,19 +88,21 @@ class NotesDetailVC: UIViewController {
             self.containerView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.containerView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             
-            self.textView.leftAnchor.constraint(equalTo: self.containerView.leftAnchor),
+            self.textView.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 16),
             self.textView.topAnchor.constraint(equalTo: self.containerView.topAnchor, constant: 120),
-            self.textView.rightAnchor.constraint(equalTo: self.containerView.rightAnchor),
+            self.textView.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -16),
+            self.textView.heightAnchor.constraint(equalToConstant: 200),
             
             self.saveBtn.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 24),
             self.saveBtn.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
             self.saveBtn.topAnchor.constraint(equalTo: self.textView.bottomAnchor, constant: 16),
-            
+            self.saveBtn.heightAnchor.constraint(equalToConstant: 44),
             
             self.deleteBtn.topAnchor.constraint(equalTo: self.saveBtn.bottomAnchor, constant: 16),
             self.deleteBtn.leftAnchor.constraint(equalTo: self.containerView.leftAnchor, constant: 24),
             self.deleteBtn.rightAnchor.constraint(equalTo: self.containerView.rightAnchor, constant: -24),
-            self.deleteBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32)
+            self.deleteBtn.bottomAnchor.constraint(equalTo: self.containerView.bottomAnchor, constant: -32),
+            self.deleteBtn.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
     
@@ -101,40 +112,44 @@ class NotesDetailVC: UIViewController {
         self.containerView.addSubview(deleteBtn)
         self.view.addSubview(containerView)
     }
-
 }
-
 
 extension NotesDetailVC {
     @objc func tapSaveNote() {
-        if notes.count <= 0 {
-            print("Notes is created successfully")
-        } else {
-            print("Notes is updated successfully")
+        let description = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty || description == "Enter notes..." {
+            let alert = UIAlertController(title: "Error", message: "Please enter some text for the note.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
         }
-        let updatedNote = Note(id: detailNote?.id ?? 1, title: detailNote?.title, description: textView.text)
-        self.delegate?.saveNotes(detailNote: updatedNote)
+        
+        let note: Note
+        if let existingNote = detailNote {
+            note = Note(id: existingNote.id, description: description)
+        } else {
+            let newId = notes.count + 1
+            note = Note(id: newId, description: description)
+        }
+        self.delegate?.saveNotes(detailNote: note)
         self.navigationController?.popViewController(animated: true)
     }
     
     @objc func deleteNote() {
-        if notes.count <= 0 {
-            self.deleteBtn.isEnabled = false
-            print("Notes is not yet created")
-            return
-        } else {
-            self.deleteBtn.isEnabled = true
-            print("Notes is deleted successfully")
-        }
-        let updatedNote = Note(id: detailNote?.id ?? 1, title: detailNote?.title, description: textView.text)
-        self.delegate?.deleteNotes(detailNote: updatedNote)
-        self.navigationController?.popViewController(animated: true)
+        guard let detailNote = detailNote else { return }
+        
+        let alert = UIAlertController(title: "Delete Note", message: "Are you sure you want to delete this note?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            self.delegate?.deleteNotes(detailNote: detailNote)
+            self.navigationController?.popViewController(animated: true)
+        }))
+        present(alert, animated: true)
     }
 }
 
 extension NotesDetailVC: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
-
         if textView.textColor == UIColor.lightGray {
             textView.text = ""
             textView.textColor = UIColor.black
@@ -142,9 +157,8 @@ extension NotesDetailVC: UITextViewDelegate {
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
-
-        if textView.text == "" {
-            //textViw.text = "Enter notes....."
+        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            textView.text = "Enter notes..."
             textView.textColor = UIColor.lightGray
         }
     }
