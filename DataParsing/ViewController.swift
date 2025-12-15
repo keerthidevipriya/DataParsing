@@ -41,6 +41,7 @@ class ViewController: UIViewController {
         tv.dataSource = self
         tv.separatorStyle = .singleLine
         tv.estimatedRowHeight = 100
+        tv.backgroundColor = .white
         tv.rowHeight = UITableView.automaticDimension
         return tv
     }()
@@ -58,13 +59,14 @@ class ViewController: UIViewController {
     lazy var infoLbl: UILabel = {
         let lbl = UILabel()
         lbl.translatesAutoresizingMaskIntoConstraints = false
-        lbl.text = "No notes created :sad Create one to start new!!!!"
-        lbl.textColor = .black
+        lbl.text = "No notes created 😔 Create one to start new!!!!"
+        lbl.textColor = .darkGray
         return lbl
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = "Personal Notes"
         self.createViews()
         self.createContentView()
         self.handleNotes()
@@ -92,8 +94,8 @@ class ViewController: UIViewController {
     }
     
     func createViews() {
-        self.containerView.addSubview(infoLbl)
         self.containerView.addSubview(tv)
+        self.containerView.addSubview(infoLbl)
         self.containerView.addSubview(createBtn)
         self.view.addSubview(containerView)
     }
@@ -121,6 +123,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
         let text = notes[indexPath.row].description
+        cell.backgroundColor = .gray
         cell.textLabel?.text = text
         return cell
     }
