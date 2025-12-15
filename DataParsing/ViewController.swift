@@ -153,11 +153,21 @@ extension ViewController {
 
 
 extension ViewController: NoteActions {
+    
+    func deleteNotes(detailNote: Note) {
+        let id = detailNote.id
+        self.notes.remove(at: id-1)
+        self.tv.reloadData()
+    }
+    
     func saveNotes(detailNote: Note) {
         let id = detailNote.id
-        self.notes.append(detailNote)
+        if notes.count > 0 {
+            self.notes.remove(at: id-1)
+            self.notes.insert(detailNote, at: detailNote.id-1)
+        } else {
+            self.notes.append(detailNote)
+        }
         
-        //self.notes.remove(at: id-1)
-        //self.notes.insert(detailNote, at: detailNote.id-1)
     }
 }

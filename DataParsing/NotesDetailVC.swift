@@ -9,6 +9,7 @@ import UIKit
 
 protocol NoteActions: AnyObject {
     func saveNotes(detailNote: Note)
+    func deleteNotes(detailNote: Note)
 }
 
 class NotesDetailVC: UIViewController {
@@ -65,6 +66,10 @@ class NotesDetailVC: UIViewController {
         super.viewDidLoad()
         self.createViews()
         self.createContentView()
+        if let detailNote = detailNote {
+            self.textView.text = detailNote.description
+            self.textView.textColor = .black
+        }
     }
     
     func createContentView() {
@@ -113,12 +118,17 @@ extension NotesDetailVC {
     }
     
     @objc func deleteNote() {
-        for i in notes {
-            if i.id == detailNote?.id {
-                notes.remove(at: (i.id)-1)
-                print("Notes is deleted successfully")
-            }
+        if notes.count <= 0 {
+            self.deleteBtn.isEnabled = false
+            print("Notes is not yet created")
+            return
+        } else {
+            self.deleteBtn.isEnabled = true
+            print("Notes is deleted successfully")
         }
+        let updatedNote = Note(id: detailNote?.id ?? 1, title: detailNote?.title, description: textView.text)
+        self.delegate?.deleteNotes(detailNote: updatedNote)
+        self.navigationController?.popViewController(animated: true)
     }
 }
 
@@ -134,8 +144,7 @@ extension NotesDetailVC: UITextViewDelegate {
     func textViewDidEndEditing(_ textView: UITextView) {
 
         if textView.text == "" {
-
-            textView.text = "enter notes....."
+            //textViw.text = "Enter notes....."
             textView.textColor = UIColor.lightGray
         }
     }
